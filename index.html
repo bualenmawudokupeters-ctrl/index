@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ECOLE - Event Media Vault</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100 min-h-screen font-sans transition-colors duration-200">
+
+    <header class="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 px-4 py-3 flex justify-between items-center sticky top-0 z-40 shadow-sm">
+        <div class="flex items-center space-x-4">
+            <div class="relative group">
+                <div id="profileWrapper" class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 border-2 border-indigo-500 overflow-hidden flex items-center justify-center cursor-pointer">
+                    <i id="profilePlaceholder" data-lucide="user" class="w-5 h-5 text-gray-500 dark:text-gray-400"></i>
+                </div>
+            </div>
+            <div class="flex flex-col">
+                <span class="text-xl font-black tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-500 dark:from-blue-400 dark:to-indigo-400">ECOLE</span>
+                <span class="text-[10px] font-medium tracking-tight text-gray-400 uppercase -mt-1">Cloud Vault</span>
+            </div>
+        </div>
+
+        <div class="flex items-center space-x-2">
+            <select id="viewSelect" class="bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-white rounded-lg px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 focus:outline-none">
+                <option value="all">📁 All Live Streams</option>
+            </select>
+            <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition">
+                <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+                <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+            </button>
+            <span id="adminBadge" class="hidden bg-red-600 text-white text-[10px] px-2 py-1 rounded font-bold uppercase tracking-wider">Admin</span>
+        </div>
+    </header>
+
+    <main class="p-4 max-w-7xl mx-auto pb-24">
+        <div id="captureSection" class="mb-8 bg-white dark:bg-gray-800 rounded-xl p-4 border border-gray-200 dark:border-gray-700 shadow-md max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-3">
+                <h2 class="text-lg font-semibold flex items-center space-x-2">
+                    <i data-lucide="camera" class="text-blue-500 dark:text-blue-400"></i><span>Capture Live Moments</span>
+                </h2>
+                <button id="closeCameraBtn" class="hidden text-gray-400 hover:text-red-500 transition text-sm flex items-center space-x-1">
+                    <i data-lucide="video-off" class="w-4 h-4"></i><span>Close Camera</span>
+                </button>
+            </div>
+            
+            <div class="relative bg-black rounded-lg overflow-hidden aspect-video mb-4 flex items-center justify-center border border-gray-300 dark:border-gray-600">
+                <video id="webcam" autoplay playsinline class="w-full h-full object-cover hidden"></video>
+                <div id="cameraPlaceholder" class="text-center p-4">
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-3">Snap or record directly to the master cloud gallery stream.</p>
+                    <button id="startCameraBtn" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow">
+                        Activate Device Camera
+                    </button>
+                </div>
+            </div>
+
+            <div id="cameraControls" class="hidden flex flex-col space-y-3">
+                <div class="grid grid-cols-3 gap-2">
+                    <button id="capturePhotoBtn" class="bg-blue-600 text-white py-2 px-2 rounded-lg flex items-center justify-center space-x-1 font-medium text-sm">
+                        <i data-lucide="aperture" class="w-4 h-4"></i><span>Snap</span>
+                    </button>
+                    <button id="recordVideoBtn" class="bg-red-600 text-white py-2 px-2 rounded-lg flex items-center justify-center space-x-1 font-medium text-sm">
+                        <i data-lucide="video" class="w-4 h-4"></i><span id="recordText">Record</span>
+                    </button>
+                    <button id="switchCameraBtn" class="bg-gray-600 text-white py-2 px-2 rounded-lg flex items-center justify-center space-x-1 font-medium text-sm">
+                        <i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Flip</span>
+                    </button>
+                </div>
+                <button id="deviceCameraFallbackBtn" class="w-full border border-gray-300 text-gray-700 dark:text-gray-300 py-2 rounded-lg text-xs hover:bg-gray-50 transition flex items-center justify-center space-x-1">
+                    <i data-lucide="sliders" class="w-3 h-3"></i><span>Use System Camera</span>
+                </button>
+            </div>
+        </div>
+
+        <div id="gallerySection">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold flex items-center space-x-2">
+                    <i data-lucide="clapperboard" class="text-indigo-500 dark:text-indigo-400"></i><span id="galleryTitle">Uploaded Event Media</span>
+                </h2>
+                <label for="directUpload" class="cursor-pointer bg-indigo-600 hover:bg-indigo-500 text-white font-medium text-xs py-2 px-4 rounded-lg flex items-center space-x-1 transition shadow">
+                    <i data-lucide="image-plus" class="w-3.5 h-3.5"></i><span>Upload Files</span>
+                </label>
+                <input type="file" id="directUpload" accept="image/*,video/*" multiple class="hidden">
+            </div>
+
+            <div id="mediaGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"></div>
+            
+            <div id="emptyState" class="text-center py-12 text-gray-400 dark:text-gray-500 hidden">
+                <i id="emptyStateIcon" data-lucide="folder-open" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                <p id="emptyStateText">No files found.</p>
+            </div>
+        </div>
+    </main>
+
+    <div class="fixed bottom-6 right-6 z-50">
+        <button id="copyAdminLinkBtn" class="bg-white dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 px-3 py-2 rounded-lg border border-gray-300 shadow-md flex items-center space-x-1">
+            <i data-lucide="key" class="w-3 h-3 text-yellow-500"></i><span>Get Admin Link</span>
+        </button>
+    </div>
+
+    <script type="module">
+        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+        // PLUGGED IN WITH YOUR EXACT SUBMITTED KEYS
+        const SUPABASE_URL = "https://dbmlypeiwymapzvhyflg.supabase.co";
+        const SUPABASE_KEY = "sb_publishable_9B1qJ7yEJPfzBpo9tQ2vEQ_Oi_UY5Hp";
+
+        const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let currentStream = null;
+        let mediaRecorder = null;
+        let recordedChunks = [];
+        let isRecording = false;
+        let currentFacingMode = "environment";
+        
+        const urlParams = new URLSearchParams(window.location.search);
+        const isAdmin = urlParams.get('mode') === 'admin';
+
+        const viewSelect = document.getElementById('viewSelect');
+        const adminBadge = document.getElementById('adminBadge');
+        const directUpload = document.getElementById('directUpload');
+        const startCameraBtn = document.getElementById('startCameraBtn');
+        const closeCameraBtn = document.getElementById('closeCameraBtn');
+        const cameraPlaceholder = document.getElementById('cameraPlaceholder');
+        const webcam = document.getElementById('webcam');
+        const cameraControls = document.getElementById('cameraControls');
+        const capturePhotoBtn = document.getElementById('capturePhotoBtn');
+        const recordVideoBtn = document.getElementById('recordVideoBtn');
+        const switchCameraBtn = document.getElementById('switchCameraBtn');
+        const deviceCameraFallbackBtn = document.getElementById('deviceCameraFallbackBtn');
+        const recordText = document.getElementById('recordText');
+        const mediaGrid = document.getElementById('mediaGrid');
+        const emptyState = document.getElementById('emptyState');
+        const emptyStateIcon = document.getElementById('emptyStateIcon');
+        const emptyStateText = document.getElementById('emptyStateText');
+        const themeToggle = document.getElementById('themeToggle');
+
+        window.addEventListener('DOMContentLoaded', () => {
+            lucide.createIcons();
+            initTheme();
+            
+            if (isAdmin) {
+                adminBadge.classList.remove('hidden');
+                document.getElementById('galleryTitle').innerText = "All Uploaded Vault Media (Admin Mode)";
+                loadMediaGrid();
+                
+                // Real-time listener for instantly loading cards as people upload across the room
+                supabase
+                    .channel('schema-db-changes')
+                    .on('postgres_changes', { event: '*', schema: 'public', table: 'media' }, () => {
+                        loadMediaGrid();
+                    })
+                    .subscribe();
+            } else {
+                viewSelect.classList.add('hidden');
+                emptyStateIcon.setAttribute('data-lucide', 'lock');
+                emptyStateText.innerHTML = "Secure Gateway Active. Capture elements sync straight to event monitors.";
+                emptyState.classList.remove('hidden');
+                lucide.createIcons();
+            }
+
+            startCameraBtn.addEventListener('click', setupCamera);
+            closeCameraBtn.addEventListener('click', stopCamera);
+            capturePhotoBtn.addEventListener('click', capturePhoto);
+            recordVideoBtn.addEventListener('click', toggleVideoRecording);
+            switchCameraBtn.addEventListener('click', switchCamera);
+            directUpload.addEventListener('change', handleDirectUpload);
+            themeToggle.addEventListener('click', toggleTheme);
+            deviceCameraFallbackBtn.addEventListener('click', () => { stopCamera(); directUpload.click(); });
+            
+            document.getElementById('copyAdminLinkBtn').addEventListener('click', () => {
+                const adminUrl = window.location.origin + window.location.pathname + '?mode=admin';
+                navigator.clipboard.writeText(adminUrl);
+                alert("Admin Access Link Copied!");
+            });
+        });
+
+        function initTheme() {
+            if (localStorage.getItem('theme') === 'light') document.documentElement.classList.remove('dark');
+            else document.documentElement.classList.add('dark');
+        }
+
+        function toggleTheme() {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        async function setupCamera() {
+            if (currentStream) currentStream.getTracks().forEach(track => track.stop());
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({
+                    video: { width: { ideal: 1280 }, height: { ideal: 720 }, facingMode: currentFacingMode },
+                    audio: false
+                });
+                webcam.srcObject = currentStream;
+                webcam.classList.remove('hidden');
+                cameraPlaceholder.classList.add('hidden');
+                cameraControls.classList.remove('hidden');
+                closeCameraBtn.classList.remove('hidden');
+            } catch (err) {
+                alert("Camera setup failed.");
+            }
+        }
+
+        function switchCamera() {
+            currentFacingMode = (currentFacingMode === "environment") ? "user" : "environment";
+            setupCamera();
+        }
+
+        function stopCamera() {
+            if (currentStream) currentStream.getTracks().forEach(track => track.stop());
+            currentStream = null;
+            webcam.srcObject = null;
+            webcam.classList.add('hidden');
+            cameraPlaceholder.classList.remove('hidden');
+            cameraControls.classList.add('hidden');
+            closeCameraBtn.classList.add('hidden');
+        }
+
+        async function uploadFileToCloud(blob, fileType) {
+            const uniqueId = Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+            const fileName = `${uniqueId}.${fileType.split('/')[1] || 'bin'}`;
+            
+            try {
+                // 1. Upload raw physical binary file to Supabase Storage Bucket
+                const { data: storageData, error: storageError } = await supabase.storage
+                    .from('gallery')
+                    .upload(fileName, blob, { contentType: fileType });
+
+                if (storageError) throw storageError;
+
+                // 2. Generate the permanent public asset link url 
+                const { data: urlData } = supabase.storage.from('gallery').getPublicUrl(fileName);
+                
+                // 3. Write data entry reference down to the public.media database row catalog
+                const { error: dbError } = await supabase
+                    .from('media')
+                    .insert([{
+                        url: urlData.publicUrl,
+                        storage_path: fileName,
+                        type: fileType,
+                        timestamp: Date.now()
+                    }]);
+
+                if (dbError) throw dbError;
+                
+                alert("Sent directly to Event Cloud!");
+            } catch (error) {
+                console.error(error);
+                alert("Cloud transfer broke down.");
+            }
+        }
+
+        function capturePhoto() {
+            const canvas = document.createElement('canvas');
+            canvas.width = webcam.videoWidth;
+            canvas.height = webcam.videoHeight;
+            const ctx = canvas.getContext('2d');
+            if (currentFacingMode === "user") {
+                ctx.translate(canvas.width, 0);
+                ctx.scale(-1, 1);
+            }
+            ctx.drawImage(webcam, 0, 0);
+            canvas.toBlob(blob => uploadFileToCloud(blob, 'image/jpeg'), 'image/jpeg', 0.85);
+        }
+
+        function toggleVideoRecording() {
+            if (!isRecording) {
+                recordedChunks = [];
+                try { mediaRecorder = new MediaRecorder(currentStream, { mimeType: 'video/webm' }); }
+                catch(e) { mediaRecorder = new MediaRecorder(currentStream); }
+                
+                mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+                    uploadFileToCloud(blob, mediaRecorder.mimeType);
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                recordVideoBtn.classList.replace('bg-red-600', 'bg-yellow-600');
+                recordText.innerText = "Stop";
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                recordVideoBtn.classList.replace('bg-yellow-600', 'bg-red-600');
+                recordText.innerText = "Record";
+            }
+        }
+
+        function handleDirectUpload(e) {
+            for (let file of e.target.files) {
+                uploadFileToCloud(file, file.type);
+            }
+        }
+
+        async function loadMediaGrid() {
+            mediaGrid.innerHTML = '';
+            try {
+                const { data: records, error } = await supabase
+                    .from('media')
+                    .select('*')
+                    .order('timestamp', { ascending: false });
+
+                if (error) throw error;
+
+                if (!records || records.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+
+                emptyState.classList.add('hidden');
+                records.forEach(record => {
+                    renderCard(record);
+                });
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        function renderCard(record) {
+            const card = document.createElement('div');
+            card.className = "bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden shadow-sm flex flex-col justify-between relative group";
+            
+            const isVideo = record.type.startsWith('video/');
+            let preview = !isVideo 
+                ? `<img src="${record.url}" class="w-full aspect-square object-cover bg-black cursor-pointer">`
+                : `<div class="relative w-full aspect-square bg-black flex items-center justify-center cursor-pointer"><video src="${record.url}" class="w-full h-full object-cover" loop></video><i data-lucide="play-circle" class="absolute w-10 h-10 text-white/90"></i></div>`;
+
+            card.innerHTML = `
+                <div>${preview}</div>
+                <div class="p-2 bg-gray-50 dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700 flex justify-between items-center text-xs">
+                    <span class="text-gray-400 font-mono text-[10px]">Cloud Asset</span>
+                    <div class="flex items-center space-x-2">
+                        <a href="${record.url}" target="_blank" download class="text-emerald-500 font-medium hover:underline">Save</a>
+                        <button data-id="${record.id}" data-path="${record.storage_path}" class="text-red-500 font-medium hover:underline delete-btn">Delete</button>
+                    </div>
+                </div>`;
+
+            if (isVideo) {
+                const v = card.querySelector('video');
+                card.querySelector('.relative').addEventListener('click', () => v.paused ? v.play() : v.pause());
+            }
+            
+            card.querySelector('.delete-btn').addEventListener('click', async (e) => {
+                if (!confirm("Permanently wipe file from Cloud Storage?")) return;
+                const rowId = e.target.getAttribute('data-id');
+                const pathName = e.target.getAttribute('data-path');
+                try {
+                    // Wipe from file storage bucket container
+                    await supabase.storage.from('gallery').remove([pathName]);
+                    // Delete index line row from the db list
+                    await supabase.from('media').delete().eq('id', rowId);
+                    loadMediaGrid();
+                } catch(err) { alert("Delete operation failed."); }
+            });
+
+            mediaGrid.appendChild(card);
+            lucide.createIcons();
+        }
+    </script>
+</body>
+</html>
